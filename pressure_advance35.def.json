@@ -1,0 +1,152 @@
+{
+    "material_pressure_advance_factor": {
+        "label": "Pressure Advance Factor",
+        "description": "Extrusion coefficient for Pressure Advance in Klipper firmware. This feature can greatly reduce blobbing when cornering and ooze during non-extrusion moves. A very high setting will result in large extruder movements when accelerating/decelerating, which may result in missed steps. Common values are '0.01 - 0.10' for direct drive and '0.20 - 1.0' for bowden extruders. A value of '0' disables pressure advance, unless individual line types have set values.",
+        "type": "float",
+        "default_value": 0,
+        "minimum_value": "0",
+        "maximum_value_warning": "1.0",
+        "settable_per_mesh": true,
+        "settable_per_extruder": true,
+        "settable_per_meshgroup": true,
+        "children": {
+            "material_pressure_advance_factor_infill": {
+                "label": "Infill Pressure Advance",
+                "description": "Pressure Advance factor when printing infill. Adjustments can minimize flow rate issues when varying infill print speed and reduce excessive extruder movements. Reducing may increase stringing, especially if combing is disabled.  A value of '0' disables pressure advance for this feature.",
+                "type": "float",
+                "default_value": 0,
+                "minimum_value": "0",
+                "maximum_value_warning": "1.0",
+                "settable_per_mesh": true,
+                "settable_per_extruder": true,
+                "settable_per_meshgroup": true,
+                "value": "material_pressure_advance_factor",
+                "enabled": "infill_sparse_density > 0",
+                "limit_to_extruder": "infill_extruder_nr"
+            },
+            "material_pressure_advance_factor_wall": {
+                "label": "Wall Pressure Advance",
+                "description": "Pressure Advance factor used when printing walls. Optimized values can sharpen the appearance of corners, reduce blobbing and minimize over/under extrusion when features are printed at different speeds. A value of '0' disables pressure advance for this feature.",
+                "type": "float",
+                "default_value": 0,
+                "minimum_value": "0",
+                "maximum_value_warning": "1.0",
+                "settable_per_mesh": true,
+                "settable_per_extruder": true,
+                "settable_per_meshgroup": true,
+                "enabled": "wall_line_count > 0",
+                "value": "material_pressure_advance_factor",
+                "children": {
+                    "material_pressure_advance_factor_wall_0": {
+                        "label": "Outer Wall Pressure Advance",
+                        "description": "Pressure Advance factor used for the outermost wall. Adjusting can minimize flow rate issues when printing walls at different speeds and sharpen the appearance of corners. A value of '0' disables pressure advance for this feature.",
+                        "type": "float",
+                        "default_value": 0,
+                        "minimum_value": "0",
+                        "maximum_value_warning": "1.0",
+                        "settable_per_mesh": true,
+                        "settable_per_extruder": true,
+                        "settable_per_meshgroup": true,
+                        "value": "material_pressure_advance_factor_wall",
+                        "limit_to_extruder": "wall_0_extruder_nr"
+                    },
+                    "material_pressure_advance_factor_wall_x": {
+                        "label": "Inner Wall Pressure Advance",
+                        "description": "Pressure Advance factor used only for inner walls. Adjustments can minimize flow rate issues when outer wall speed is different than surrounding features. A value of '0' disables pressure advance for this feature.",
+                        "type": "float",
+                        "default_value": 0,
+                        "minimum_value": "0",
+                        "maximum_value_warning": "1.0",
+                        "settable_per_mesh": true,
+                        "settable_per_extruder": true,
+                        "settable_per_meshgroup": true,
+                        "enabled": "wall_line_count > 1",
+                        "value": "material_pressure_advance_factor_wall",
+                        "limit_to_extruder": "wall_x_extruder_nr"
+                    }
+                }
+            },
+            "material_pressure_advance_factor_topbottom": {
+                "label": "Top/Bottom Pressure Advance",
+                "description": "Pressure Advance factor used for top/bottom skin layers. Optimized value can improve surface appearance when speed is modified for these layers. High values may lead to excessive extruder movements.  A value of '0' disables pressure advance for this feature.",
+                "type": "float",
+                "default_value": 0,
+                "minimum_value": "0",
+                "maximum_value_warning": "1.0",
+                "settable_per_mesh": true,
+                "settable_per_extruder": true,
+                "settable_per_meshgroup": true,
+                "enabled": "top_bottom_thickness > 0",
+                "value": "material_pressure_advance_factor",
+                "limit_to_extruder": "top_bottom_extruder_nr"
+            },
+            "material_pressure_advance_factor_support": {
+                "label": "Support Structure Pressure Advance",
+                "description": "Pressure Advance factor used for support structures. Reducing may can minimize excessive filament grinding but may introduce stringing between other features. A value of '0' disables pressure advance for this feature.",
+                "type": "float",
+                "default_value": 0,
+                "minimum_value": "0",
+                "maximum_value_warning": "1.0",
+                "settable_per_mesh": false,
+                "settable_per_extruder": true,
+                "settable_per_meshgroup": false,
+                "value": "material_pressure_advance_factor",
+                "enabled": "support_enable or support_tree_enable",
+                "limit_to_extruder": "support_extruder_nr"
+            },
+            "material_pressure_advance_factor_support_interface": {
+                "label": "Support Interface Pressure Advance",
+                "description": "Pressure Advance factor used for the support interface. Adjusting may improve interface surface quality when varying print speeds but higher values may cause excessive extruder movements. A value of '0' disables pressure advance for this feature.",
+                "type": "float",
+                "default_value": 0,
+                "minimum_value": "0",
+                "maximum_value_warning": "1.0",
+                "settable_per_mesh": false,
+                "settable_per_extruder": true,
+                "settable_per_meshgroup": false,
+                "value": "material_pressure_advance_factor_support",
+                "enabled": "support_interface_enable and (support_enable or support_tree_enable)",
+                "limit_to_extruder": "support_interface_extruder_nr"
+            },
+            "material_pressure_advance_factor_prime_tower": {
+                "label": "Prime Tower Pressure Advance",
+                "description": "Pressure Advance factor used when printing a prime tower. A value of '0' disables pressure advance for this feature.",
+                "type": "float",
+                "default_value": 0,
+                "minimum_value": "0",
+                "maximum_value_warning": "1.0",
+                "settable_per_mesh": false,
+                "settable_per_extruder": true,
+                "settable_per_meshgroup": false,
+                "value": "material_pressure_advance_factor",
+                "enabled": "resolveOrValue('prime_tower_enable')"
+            },
+            "material_pressure_advance_factor_skirt_brim": {
+                "label": "Skirt/Brim Pressure Advance",
+                "description": "Pressure Advance factor used when printing skirts or brims. A value of '0' disables pressure advance for this feature.",
+                "type": "float",
+                "default_value": 0,
+                "minimum_value": "0",
+                "maximum_value_warning": "1.0",
+                "settable_per_mesh": false,
+                "settable_per_extruder": true,
+                "settable_per_meshgroup": false,
+                "value": "material_pressure_advance_factor",
+                "enabled": "resolveOrValue('adhesion_type') == 'skirt' or resolveOrValue('adhesion_type') == 'brim' or resolveOrValue('draft_shield_enabled') or resolveOrValue('ooze_shield_enabled')",
+                "limit_to_extruder": "adhesion_extruder_nr"
+            },
+            "material_pressure_advance_factor_layer_0": {
+                "label": "Initial Layer Pressure Advance",
+                "description": "Pressure Advance factor used only during the first layer. Value will apply to every line type equally. A value of '0' disables pressure advance for this feature.",
+                "type": "float",
+                "default_value": 0,
+                "minimum_value": "0",
+                "maximum_value_warning": "1.0",
+                "settable_per_mesh": false,
+                "settable_per_extruder": true,
+                "settable_per_meshgroup": false,
+                "value": "material_pressure_advance_factor"
+            }
+        }
+    }
+}

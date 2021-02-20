@@ -1,0 +1,8 @@
+{
+    "name": "Pressure Advance Setting",
+    "author": "JJFX",
+    "version": "1.1.0",
+    "description": "Adds Klipper Pressure Advance Factor Settings",
+    "api": 5,
+    "supported_sdk_versions": ["5.0.0", "6.0.0", "7.0.0"]
+}
