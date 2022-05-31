@@ -1,10 +1,11 @@
-# PressureAdvanceSettingPlugin v1.4.0
+# PressureAdvanceSettingPlugin v1.4.1
 # For Personal Use - Copyright (c) 2022 JJFX Design
 # Project based on LinearAdvanceSettingPlugin (Copyright (c) 2020 Aldo Hoeben / fieldOfView)
 # The PressureAdvanceSettingPlugin is released under the terms of the AGPLv3 or higher.
 #
-# ** Compatible ONLY with Klipper Firmware **
-# ** Tested up to Cura version 5.0
+# * Compatible ONLY with Klipper Firmware
+# * Tested up to Cura version 5.0
+# * Per object setting support disabled in Cura versions older than 4.7
 
 from UM.Extension import Extension
 from cura.CuraApplication import CuraApplication
@@ -40,14 +41,14 @@ class PressureAdvanceSettingPlugin(Extension):
         self._expanded_categories = []  # type: List[str]  # temporary list used while creating nested settings
 
         try:
-            api_version = self._application.getAPIVersion()
+            self._api_version = self._application.getAPIVersion()
         except AttributeError:
             # UM.Application.getAPIVersion was added for API > 6 (Cura 4)
             # Since this plugin version is only compatible with Cura 3.5 and newer, and no version-granularity
             # is required before Cura 4.7, it is safe to assume API 5
-            api_version = Version(5)
+            self._api_version = Version(5)
 
-        if api_version < Version("7.3.0"):
+        if self._api_version < Version("7.3.0"):
             settings_definition_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "pressure_advance35.def.json")
         else:
             settings_definition_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "pressure_advance47.def.json")
@@ -122,11 +123,14 @@ class PressureAdvanceSettingPlugin(Extension):
         if not global_container_stack or not used_extruder_stacks:
             return
 
-        # Retrieve state of pressure advance control setting (Bool)
+        # Get state of pressure advance control setting (Bool)
         pressure_advance_control = global_container_stack.getProperty("material_pressure_advance_enable", "value")
         if not pressure_advance_control:
             Logger.log("i", "Pressure Advance Control is Disabled - Gcode Not Processed")
             return # Do not process gcode if Disabled
+
+        # Disable per-object settings for older Cura versions
+        support_per_object_settings = self._api_version > Version("7.3.0")
 
         gcode_dict = getattr(scene, "gcode_dict", {})
         if not gcode_dict: # this also checks for an empty dict
@@ -134,7 +138,7 @@ class PressureAdvanceSettingPlugin(Extension):
             return
 
         # Pressure advance Klipper command template
-        gcode_cmd_pattern = "SET_PRESSURE_ADVANCE ADVANCE=%f EXTRUDER=%s"
+        gcode_cmd_pattern = "SET_PRESSURE_ADVANCE ADVANCE=%f EXTRUDER=extruder%s"
         gcode_cmd_pattern += " ;PressureAdvanceSettingPlugin"
 
         dict_changed = False
@@ -148,10 +152,6 @@ class PressureAdvanceSettingPlugin(Extension):
                 Logger.log("d", "Plate %s has already been processed", plate_id)
                 continue
 
-            setting_key = "material_pressure_advance_factor"
-            active_extruder_list = list(range(len([extruder for extruder in used_extruder_stacks if extruder.isEnabled])))
-            non_mesh_features = list(self.__gcode_type_to_setting_key)[8:] # SUPPORT, SKIRT, etc.
-
             # Extruder Dictionaries
             apply_factor_per_feature = {}  # type: Dict[int, bool]
             current_advance_factors = {}  # type: Dict[int, float]
@@ -161,16 +161,18 @@ class PressureAdvanceSettingPlugin(Extension):
             per_mesh_settings = {} # type: Dict[(str,str), float]
             per_mesh_extruders = {} # type: Dict[str, int]
 
+            non_mesh_features = list(self.__gcode_type_to_setting_key)[8:] # SUPPORT, SKIRT, etc.
+            setting_key = "material_pressure_advance_factor"
+
             # GET SETTINGS FOR ALL EXTRUDERS
             for extruder_stack in used_extruder_stacks:
                 extruder_nr = int(extruder_stack.getProperty("extruder_nr", "value"))
-                # Convert extruder number to str for Klipper
-                extruder_klip = "extruder" + str(extruder_nr) if extruder_nr > 0 else "extruder"
-                
                 pressure_advance_factor = extruder_stack.getProperty(setting_key, "value")
                 current_advance_factors[extruder_nr] = pressure_advance_factor
+
                 try:
-                    gcode_list[1] = gcode_list[1] + gcode_cmd_pattern % (pressure_advance_factor, extruder_klip) + "\n"
+                    gcode_list[1] = gcode_list[1] + gcode_cmd_pattern % (
+                                    pressure_advance_factor, str(extruder_nr).strip('0')) + "\n"
                 except TypeError:
                     Logger.log("e", "Invalid pressure advance value: '%s'", pressure_advance_factor)
                     return
@@ -184,7 +186,7 @@ class PressureAdvanceSettingPlugin(Extension):
                     if (not apply_factor_per_feature.get(extruder_nr, False)
                         and per_extruder_settings[(extruder_nr,feature_type_key)] != pressure_advance_factor):
 
-                        apply_factor_per_feature[extruder_nr] = True # Start gcode processing loop
+                        apply_factor_per_feature[extruder_nr] = True # Flag to process gcode
 
 
             # GET SETTINGS FOR ALL PRINTABLE MESH OBJECTS THAT ARE NOT SUPPORT
@@ -195,18 +197,20 @@ class PressureAdvanceSettingPlugin(Extension):
                 return
 
             for node in nodes:
+                if not support_per_object_settings:
+                    break # Use only extruder values for older Cura versions
+
                 node_settings = node.callDecoration("getStack").getTop()
                 mesh_name = node.getName() # Filename of mesh with extension
-
                 active_extruder_nr = int(node.callDecoration("getActiveExtruderPosition"))
                 per_mesh_extruders[mesh_name] = active_extruder_nr # Active extruder number of each mesh
-                
+
                 # Get all feature settings for each mesh object
                 for feature_type_key,feature_setting_key in self.__gcode_type_to_setting_key.items():
-                    # Use extruder value if no per object setting is defined
                     if node_settings.getInstance(feature_setting_key) is not None:
                         mesh_setting_value = node_settings.getInstance(feature_setting_key).value
                     else:
+                        # Use extruder value if no per object setting is defined
                         if (mesh_name,feature_type_key) not in per_mesh_settings:
                             per_mesh_settings[(mesh_name,feature_type_key)] = per_extruder_settings[(active_extruder_nr,feature_type_key)]
                         continue
@@ -224,30 +228,31 @@ class PressureAdvanceSettingPlugin(Extension):
                                 per_mesh_settings[(mesh_name,feature)] = mesh_setting_value
 
                                 if not apply_factor_per_feature.get(active_extruder_nr, False):
-                                    apply_factor_per_feature[active_extruder_nr] = True # Start gcode processing loop
-
+                                    apply_factor_per_feature[active_extruder_nr] = True # Flag to process gcode
 
             # POST-PROCESS GCODE LOOP
             if any(apply_factor_per_feature.values()):
+                active_extruder_list = list(apply_factor_per_feature)
+                extruder_nr = active_extruder_list[0] # Start with first extruder
                 current_layer_nr = -1
                 current_mesh = None
                 feature_type_error = False
-                extruder_nr = 0 # Start with first extruder
 
                 for layer_nr, layer in enumerate(gcode_list):
                     lines = layer.split("\n")
                     lines_changed = False
                     for line_nr, line in enumerate(lines):
+
                         if line.startswith(";LAYER:"):
                             try:
                                 current_layer_nr = int(line[7:]) # Get gcode layer number
                             except ValueError:
                                 Logger.log("w", "Could not parse layer number: ", line)
-
-                            new_layer = True # Set for error checking
+                            # Layer check used to detect per object feature errors
+                            new_layer = bool(support_per_object_settings)
 
                         if len(active_extruder_list) > 1:
-                            # Check for toolhead change gcode command (T0,T1...)
+                            # Check for tool change gcode command (T0,T1...)
                             if line in ["T" + str(i) for i in active_extruder_list]:
                                 try:
                                     extruder_nr = int(line[1:]) # Get active extruder number from gcode
@@ -259,26 +264,24 @@ class PressureAdvanceSettingPlugin(Extension):
 
                             # Fix for when Cura rudely declares TYPE before MESH in new layer
                             if feature_type_error:
-                                last_advance_factor = current_advance_factors[extruder_nr]
                                 feature_type = "LAYER_0" if current_layer_nr <= 0 else feature_type
+                                if per_mesh_settings[(current_mesh,feature_type)] != current_advance_factors[extruder_nr]:
+                                    current_advance_factors[extruder_nr] = per_mesh_settings[(current_mesh,feature_type)]
 
-                                current_advance_factors[extruder_nr] = per_mesh_settings[(current_mesh,feature_type)]
-
-                                if current_advance_factors[extruder_nr] != last_advance_factor:
-                                    extruder_klip = "extruder" + str(extruder_nr) if extruder_nr > 0 else "extruder"
-                                    lines.insert(line_nr, gcode_cmd_pattern % (current_advance_factors[extruder_nr], extruder_klip))
+                                    lines.insert(line_nr, gcode_cmd_pattern % (
+                                        current_advance_factors[extruder_nr], str(extruder_nr).strip('0')))
                                     lines_changed = True # Corrected command inserted into gcode
+
                                 feature_type_error = new_layer = False
-                                continue
+                                continue # Clear error and resume loop
 
                         if line.startswith(";TYPE:"):
                             feature_type = line[6:] # Get gcode feature type
-                            
-                            # Check for unknown mesh feature in a new layer 
+
+                            # Check for unknown mesh feature in a new layer
                             if new_layer and feature_type not in non_mesh_features:
                                 feature_type_error = True
                                 continue # Error corrected at next MESH line
-
                             if current_layer_nr <= 0 and feature_type != "SKIRT":
                                 feature_type = "LAYER_0"
 
@@ -287,14 +290,13 @@ class PressureAdvanceSettingPlugin(Extension):
                             else:
                                 pressure_advance_factor = per_extruder_settings[(extruder_nr,feature_type)]
 
-                            # Convert extruder number to str for Klipper
-                            extruder_klip = "extruder" + str(extruder_nr) if extruder_nr > 0 else "extruder"
                             new_layer = False # Reset layer check
-
-                            # Check if value for current extruder has changed
+                            # Check if current extruder value has changed
                             if pressure_advance_factor != current_advance_factors.get(extruder_nr, None):
                                 current_advance_factors[extruder_nr] = pressure_advance_factor
-                                lines.insert(line_nr + 1, gcode_cmd_pattern % (pressure_advance_factor, extruder_klip))
+
+                                lines.insert(line_nr + 1, gcode_cmd_pattern % (
+                                    pressure_advance_factor, str(extruder_nr).strip('0')))
                                 lines_changed = True # New command inserted into gcode
 
                     if lines_changed:
