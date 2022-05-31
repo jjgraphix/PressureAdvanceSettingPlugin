@@ -7,7 +7,7 @@
         "resolve": "any(extruderValues('material_pressure_advance_enable'))",
         "settable_per_mesh": false,
         "settable_per_extruder": false,
-        "settable_per_meshgroup": false,
+        "settable_per_meshgroup": false
     },
     "material_pressure_advance_factor": {
         "label": "Pressure Advance Factor",
@@ -17,7 +17,7 @@
         "minimum_value": "0",
         "maximum_value_warning": "0.8",
         "enabled": "resolveOrValue('material_pressure_advance_enable')",
-        "settable_per_mesh": true,
+        "settable_per_mesh": false,
         "settable_per_extruder": true,
         "settable_per_meshgroup": false,
         "children": {
@@ -30,7 +30,7 @@
                 "minimum_value": "0",
                 "maximum_value_warning": "0.8",
                 "enabled": "resolveOrValue('material_pressure_advance_enable') and infill_sparse_density > 0",
-                "settable_per_mesh": true,
+                "settable_per_mesh": false,
                 "settable_per_extruder": true,
                 "settable_per_meshgroup": false,
                 "limit_to_extruder": "infill_extruder_nr"
@@ -44,7 +44,7 @@
                 "minimum_value": "0",
                 "maximum_value_warning": "0.8",
                 "enabled": "resolveOrValue('material_pressure_advance_enable') and wall_line_count > 0",
-                "settable_per_mesh": true,
+                "settable_per_mesh": false,
                 "settable_per_extruder": true,
                 "settable_per_meshgroup": false,
                 "children": {
@@ -57,7 +57,7 @@
                         "minimum_value": "0",
                         "maximum_value_warning": "0.8",
                         "enabled": "resolveOrValue('material_pressure_advance_enable') and wall_line_count > 0",
-                        "settable_per_mesh": true,
+                        "settable_per_mesh": false,
                         "settable_per_extruder": true,
                         "settable_per_meshgroup": false,
                         "limit_to_extruder": "wall_0_extruder_nr"
@@ -71,7 +71,7 @@
                         "minimum_value": "0",
                         "maximum_value_warning": "0.8",
                         "enabled": "resolveOrValue('material_pressure_advance_enable') and wall_line_count > 1",
-                        "settable_per_mesh": true,
+                        "settable_per_mesh": false,
                         "settable_per_extruder": true,
                         "settable_per_meshgroup": false,
                         "limit_to_extruder": "wall_x_extruder_nr"
@@ -87,7 +87,7 @@
                 "minimum_value": "0",
                 "maximum_value_warning": "0.8",
                 "enabled": "resolveOrValue('material_pressure_advance_enable') and top_bottom_thickness > 0",
-                "settable_per_mesh": true,
+                "settable_per_mesh": false,
                 "settable_per_extruder": true,
                 "settable_per_meshgroup": false,
                 "limit_to_extruder": "top_bottom_extruder_nr"
@@ -135,19 +135,6 @@
                         "limit_to_extruder": "support_interface_extruder_nr"
                     }
                 }
-            },
-            "material_pressure_advance_factor_prime_tower": {
-                "label": "Prime Tower Pressure Advance",
-                "description": "Pressure Advance factor used when printing a prime tower.<br /><br /> A value of '0' disables pressure advance for this feature. Most users will not benefit from adjusting this value.",
-                "type": "float",
-                "default_value": 0,
-                "value": "material_pressure_advance_factor",
-                "minimum_value": "0",
-                "maximum_value_warning": "0.8",
-                "enabled": "resolveOrValue('material_pressure_advance_enable') and resolveOrValue('prime_tower_enable')",
-                "settable_per_mesh": false,
-                "settable_per_extruder": true,
-                "settable_per_meshgroup": false
             },
             "material_pressure_advance_factor_skirt_brim": {
                 "label": "Skirt/Brim Pressure Advance",
