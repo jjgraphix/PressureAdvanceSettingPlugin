@@ -21,6 +21,11 @@ SET_PRESSURE_ADVANCE ADVANCE=<value> EXTRUDER=extruder<int>
 - Support infill and interface settings now grouped under a single support option.
 - Minor updates to setting definitions.
 
+<details><summary>Bug Fix - v1.4.1</summary>
+  &nbsp;&nbsp;&nbsp;&bull; Disabled per-mesh setting support and "prime tower" option for older Cura versions.<br>
+  &nbsp;&nbsp;&nbsp;&bull; Fixed error when only extruder used is not number 0.
+</details>
+
 #### Multiple Extruders
 To improve reliability, active tool head numbers are now set by detecting Tool Select commands in gcode (T0, T1, T2...). This is then translated into Klipper's standard naming convention of 'extruder', 'extruder1' and so on. I could not get this technique to fail in testing but other plugins/scripts that modify tool change behavior may not be compatible.
 
@@ -29,26 +34,26 @@ Due to all the potential variables it's difficult to fully test so please report
 
 ### How to Use
 
-The added **Enable Pressure Advance** option effectively enables/disables this plugin. When unchecked, no commands will be added to final gcode. This does **not** mean pressure advance is disabled. To command Klipper to disable pressure advance, *enable* control and set values to '0'.
+The **Enable Pressure Advance** option is added to the *bottom* of the Material category and effectively enables/disables this plugin. When unchecked, no commands will be added to final gcode. This does **NOT** mean pressure advance is disabled. To command Klipper to disable pressure advance, *enable control* and set values to '0'. Disabling the control option for individual extruders is not currently supported.
 
 When **Enabled**, most feature-specfic settings can be adjusted:
   
 <details><summary>Extruder Settings</summary><br>
-
-![image](https://user-images.githubusercontent.com/51905518/169948646-a2f14f0c-3706-4c19-ae65-c1ca236d0001.png)
-
-</p>
+  Check setting visibility if options are missing.<br>
+  
+  ![image](https://github.com/jjgraphix/PressureAdvanceSettingPlugin/blob/main/images/PAP-v1.4.0_ExtruderSettings.JPG)
+  
 </details>
 <details><summary>Per-Object Settings</summary><br>
+  Per-object settings only supported for Cura version 4.7 and newer.<br>
+  
+  ![image](https://github.com/jjgraphix/PressureAdvanceSettingPlugin/blob/main/images/PAP-v1.4.0_MeshSettings.JPG)
 
-![image](https://user-images.githubusercontent.com/51905518/169949436-f26d0d67-0123-41a1-87a7-be0ab44e3f2c.png)
-
-</p>
 </details>
 
-Any defined subsettings will always override the primary factor value. Setting just the primary factor in *per-object settings* will override **all extruder settings for that mesh**. However, this will not affect settings for non-mesh features (first layer, skirt/brim and supports).
+Any defined subsettings will always override the primary factor value. Only setting the primary factor in *per-object settings* will override all extruder settings for that mesh. However, this will not affect non-mesh feature settings (first layer, skirt/brim and supports).
 
-I'm of the mindset that it's always best to have access to more settings, even if they're rarely needed. If you're wondering who could possibly need to change all of these, you're probably right. Most users should simply use it for saving profiles with the primary value and leave the rest hidden. Advanced users will likely see a benefit from independently controlling features like walls. For extruders/materials requiring higher values, reducing it during infill, skin or support can help minimize excessive extruder movements, especially at high acceleration. The primary reason I added per-object setting support is for testing. This makes it easy to quickly print multiple test geometries using different values at the same time. <br><br>
+If you're wondering who could possibly need to change all of these, you're probably right. Most users should simply use it for saving profiles with the primary value and leave the rest hidden. Advanced users will likely see a benefit from independently controlling features like walls. For extruders/materials requiring higher values, reducing it during infill, skin or support can help minimize excessive extruder movements, especially at high acceleration. The primary reason I added per-object setting support is for testing. This makes it easy to quickly print multiple test geometries using different values at the same time. <br><br>
 
 ## Installation
 **_Not currently available in the Cura marketplace_**. *I am working on creating a .curapackage for streamlined installation but this is currently beyond my knowledge. If anyone would like to assist me with it, please let me know.* <br><br>
