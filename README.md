@@ -2,6 +2,8 @@
 
 *Compatibility tested up to Cura version 5.0.0 (SDK 8.0.0)* <br><br>
 
+*My new [KlipperSettingsPlugin](https://github.com/jjgraphix/KlipperSettingsPlugin/blob/main/KlipperSettingsPlugin.py)! includes Pressure Advance and a number of other Klipper features. Give it a shot!* 
+
 Unofficial Cura plugin which adds the feature option "Enable Pressure Advance Control". When enabled, a number of feature-specific "Pressure Advance" subsettings are added to the Material category in the Custom print setup of Cura.
 
 Designed to work natively on any printer running Klipper with Pressure Advance enabled. Now fully compatible with multiple extruders and per-object settings. Does not currently support changing pressure advance smooth time but let me know if anyone would like to see it implemented. It is **NOT** compatible with Marlin's Linear Advance. 
