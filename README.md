@@ -2,7 +2,7 @@
 
 *Compatibility tested up to Cura version 5.0.0 (SDK 8.0.0)* <br><br>
 
-*My new [KlipperSettingsPlugin](https://github.com/jjgraphix/KlipperSettingsPlugin/blob/main/KlipperSettingsPlugin.py)! includes Pressure Advance and a number of other Klipper features. Give it a shot!* 
+*My new [KlipperSettingsPlugin](https://github.com/jjgraphix/KlipperSettingsPlugin/blob/main/KlipperSettingsPlugin.py) includes Pressure Advance and a number of other Klipper features. Give it a shot!*<br><br>
 
 Unofficial Cura plugin which adds the feature option "Enable Pressure Advance Control". When enabled, a number of feature-specific "Pressure Advance" subsettings are added to the Material category in the Custom print setup of Cura.
 
